@@ -8,52 +8,47 @@
 import SwiftUI
 
 struct ContentView: View {
-    var emojis = ["😀", "😂", "😍", "🤔", "🥺", "🚀", "🌈", "🍕", "🐶", "🐱", "🌸", "🍩", "🎉", "🎸", "🎨", "🏀", "🚲", "🏔", "🌊", "🍁", "🍓", "🍔", "🍟", "🍺", "🍷", "🌙", "⛅️", "🌪", "🔥", "💩"]
-    @State var emojiCount = 20
+    @ObservedObject var viewModel: EmojiMemoryGame
     
     var body: some View {
-        VStack {
-            ScrollView{
-                LazyVGrid(columns: [GridItem(.adaptive(minimum: 65))]) {
-                    ForEach(emojis[0..<emojiCount], id: \.self) { emoji in
-                        CardView(content: emoji)
-                            .aspectRatio(2/3,contentMode: .fit)
-                    }
+        ScrollView{
+            LazyVGrid(columns: [GridItem(.adaptive(minimum: 65))]) {
+                ForEach(viewModel.cards) { card in
+                    CardView(card: card)
+                        .aspectRatio(2/3,contentMode: .fit)
+                        .onTapGesture {
+                            viewModel.choose(card)
+                        }
                 }
             }
-            .foregroundColor(Color.red)
-            .font(.largeTitle)
-            .padding(.horizontal, 25.0)
         }
+        .foregroundColor(Color.red)
+        .padding(.horizontal)
     }
 }
 
 struct CardView: View {
-    var content: String
-   @State var isFaceUp: Bool = true
-    
+    let card: MemoryGame<String>.Card
+
     var body: some View {
         ZStack {
             let shape = RoundedRectangle(cornerRadius: 25.0)
             
-            if isFaceUp {
+            if card.isFaceUp {
                 shape.stroke(lineWidth: 5).foregroundColor(.red)
                 shape.fill(Color.white)
-                Text(content)
+                Text(card.content)
                     .font(.largeTitle)
+                    .padding()
             }
             else {
+                shape.stroke(lineWidth: 5).foregroundColor(.red)
                 shape.fill(Color.red)
             }
         }
         .padding(.horizontal, 2.0)
-        .onTapGesture {
-            isFaceUp = !isFaceUp
-        }
     }
 }
-
-
 
 
 
@@ -63,9 +58,11 @@ struct CardView: View {
 
 struct ContentView_Previews: PreviewProvider {
     static var previews: some View {
-        ContentView()
+        
+        let game = EmojiMemoryGame()
+        ContentView(viewModel: game)
             .preferredColorScheme(.dark)
-        ContentView()
+        ContentView(viewModel: game)
             .preferredColorScheme(.light)
     }
 }
