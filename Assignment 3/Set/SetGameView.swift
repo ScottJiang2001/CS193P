@@ -11,10 +11,29 @@ struct SetGameView: View {
     @ObservedObject var setGame: SetGameViewModel
     
     var body: some View {
-        AspectVGrid(items: setGame.cards, aspectRatio: 2/3, content: {card in
-                CardView(shapeColor: card.colour, numShape: card.number, cardShape: card.shape, cardOpacity: card.opacity)
+        VStack {
+            Text("Set Game").font(.system(size: 30))
+            AspectVGrid(items: setGame.playingCards, aspectRatio: 2/3, content: {card in
+                CardView(shapeColor: card.colour, numShape: card.number, cardShape: card.shape, cardOpacity: card.opacity, selected: card.selected, matched: card.matched, notMatched: card.notMatched)
+                    .onTapGesture {
+                        print("clicked")
+                        setGame.choose(card)
+                    }
             })
-            .padding(2)
+            .padding([.top, .leading, .trailing], 25.0)
+            VStack {
+                Button("Add 3 More Cards") {
+                    setGame.addCards()
+                }.buttonStyle(.bordered)
+                    .controlSize(.large)
+                    .font(.system(size:20))
+                    .padding(.vertical, 10.0)
+                    .disabled(setGame.allCards.count == 0)
+                Button("Start New Game") {
+                    setGame.startNewGame()
+                }
+            }
+        }
     }
 }
 
@@ -23,11 +42,27 @@ struct CardView: View {
     var numShape: Int
     var cardShape: String
     var cardOpacity: CGFloat
+    var selected: Bool
+    var matched: Bool
+    var notMatched: Bool
     
     var body: some View {
         ZStack {
             let shape = RoundedRectangle(cornerRadius: DrawingConstants.cornerRadius)
-            shape.stroke(lineWidth: 1).fill(shapeColor)
+            //            shape.stroke(lineWidth: 1).fill(shapeColor)
+            if matched {
+                shape.stroke(lineWidth: 3).fill(Color.mint)
+            } else if notMatched {
+                shape.stroke(lineWidth: 3).fill(Color.orange)
+            }
+            else if selected {
+                ZStack {
+                    shape.fill(Color.yellow).opacity(0.4)
+                    shape.stroke(lineWidth: 1)
+                }
+            } else {
+                shape.stroke(lineWidth: 1)
+            }
             VStack {
                 ForEach(0..<numShape, id: \.self) { num in
                     ZStack {
@@ -50,10 +85,10 @@ struct CardView: View {
                             Circle()
                                 .stroke(shapeColor, lineWidth: 1)
                         }
-                    }.aspectRatio(2, contentMode: .fit)
+                    }.aspectRatio(2, contentMode: .fit).padding(.horizontal, 10.0)
                 }
             }
-        }.padding(2)
+        }.padding(3)
     }
     
     

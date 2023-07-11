@@ -15,8 +15,23 @@ class SetGameViewModel: ObservableObject {
     
     @Published private var model = createSetGame()
     
-    var cards: Array<SetGameModel<String>.Card> {
-        return model.cards
+    var allCards: Array<SetGameModel<String>.Card> {
+        return model.allCards
     }
     
+    var playingCards: Array<SetGameModel<String>.Card> {
+        return model.playingCards
+    }
+    
+    func choose(_ card: SetGameModel<String>.Card) {
+        model.choose(card)
+    }
+    
+    func addCards() {
+        model.addCards()
+    }
+    
+    func startNewGame() {
+        model = SetGameModel<String>()
+    }
 }
