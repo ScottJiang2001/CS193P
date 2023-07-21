@@ -23,7 +23,9 @@ struct SetGameView: View {
             .padding([.top, .leading, .trailing], 25.0)
             VStack {
                 Button("Add 3 More Cards") {
-                    setGame.addCards()
+                    withAnimation {
+                        setGame.addCards()
+                    }
                 }.buttonStyle(.bordered)
                     .controlSize(.large)
                     .font(.system(size:20))
@@ -35,6 +37,9 @@ struct SetGameView: View {
             }
         }
     }
+    
+    @State private var dealt = Set<Int>()
+    
 }
 
 struct CardView: View {
@@ -49,7 +54,6 @@ struct CardView: View {
     var body: some View {
         ZStack {
             let shape = RoundedRectangle(cornerRadius: DrawingConstants.cornerRadius)
-            //            shape.stroke(lineWidth: 1).fill(shapeColor)
             if matched {
                 shape.stroke(lineWidth: 3).fill(Color.mint)
             } else if notMatched {
