@@ -14,13 +14,13 @@ struct SetGameView: View {
         VStack {
             gameBody
             HStack {
-                discardedCards
+                discardedCards.padding(20)
                 Spacer()
                 Button("Start New Game") {
                     setGame.startNewGame()
                 }
                 Spacer()
-                undealtCards
+                undealtCards.padding(20)
             }
         }
     }
@@ -32,24 +32,12 @@ struct SetGameView: View {
                 CardView(card: card)
                     .matchedGeometryEffect(id: card.id, in: dealingNamespace)
                     .onTapGesture {
-                        print("clicked")
                         withAnimation {
                             setGame.choose(card)
                         }
                     }
             })
             .padding([.top, .leading, .trailing], 25.0)
-//            VStack {
-////                Button("Add 3 More Cards") {
-////                    withAnimation {
-////                        setGame.addCards()
-////                    }
-////                }.buttonStyle(.bordered)
-////                    .controlSize(.large)
-////                    .font(.system(size:20))
-////                    .padding(.vertical, 10.0)
-////                    .disabled(setGame.allCards.count == 0)
-//            }
         }
     }
     
@@ -59,8 +47,24 @@ struct SetGameView: View {
         -Double(setGame.allCards.firstIndex(where: { $0.id == card.id }) ?? 0)
     }
     
+    private func dealAnimation(for card: SetGameViewModel.Card) -> Animation {
+        var delay = 0.0
+        if let index = setGame.playingCards.firstIndex(where: { $0.id == card.id }) {
+            delay = Double(index) * (CardConstants.totalDealDuration / Double(setGame.playingCards.count))
+        }
+        return Animation.easeInOut(duration: CardConstants.dealDuration).delay(delay)
+    }
+    
     var discardedCards: some View {
         ZStack {
+            Text("Matched Cards")
+                .font(.system(size: 13))
+                .multilineTextAlignment(.center)
+                .background(
+                    RoundedRectangle(cornerRadius: 10)
+                        .stroke(lineWidth: 1).opacity(1)
+                        .frame(width: CardConstants.undealtWidth, height: CardConstants.undealtHeight)
+                )
             ForEach(setGame.discardedCards) { card in
                 CardView(card: card)
                     .zIndex(zIndex(of: card))
@@ -80,7 +84,6 @@ struct SetGameView: View {
         }
         .frame(width: CardConstants.undealtWidth, height: CardConstants.undealtHeight)
         .onTapGesture {
-            print("clicked")
             withAnimation {
                 setGame.addCards()
             }
@@ -94,60 +97,6 @@ struct SetGameView: View {
         static let totalDealDuration: Double = 2
         static let undealtHeight: CGFloat = 90
         static let undealtWidth: CGFloat =  undealtHeight * aspectRatio
-    }
-}
-
-struct CardView: View {
-    let card: SetGameViewModel.Card
-    var faceUp = true
-    
-    var body: some View {
-        ZStack {
-            let shape = RoundedRectangle(cornerRadius: DrawingConstants.cornerRadius)
-            if card.matched {
-                shape.stroke(lineWidth: 3).fill(Color.mint)
-            } else if card.notMatched {
-                shape.stroke(lineWidth: 3).fill(Color.orange)
-            } else if card.selected {
-                ZStack {
-                    shape.fill(Color.yellow).opacity(0.4)
-                    shape.stroke(lineWidth: 1)
-                }
-            } else {
-                shape.stroke(lineWidth: 1).opacity(1)
-            }
-            if faceUp {
-                VStack {
-                    ForEach(0..<card.number, id: \.self) { num in
-                        ZStack {
-                            if card.shape == "rectangle" {
-                                Rectangle()
-                                    .fill(card.colour)
-                                    .opacity(card.opacity)
-                                Rectangle()
-                                    .stroke(card.colour, lineWidth: 1)
-                            } else if card.shape == "diamond" {
-                                Diamond()
-                                    .fill(card.colour)
-                                    .opacity(card.opacity)
-                                Diamond()
-                                    .stroke(card.colour, lineWidth: 1)
-                            } else {
-                                Circle()
-                                    .fill(card.colour)
-                                    .opacity(card.opacity)
-                                Circle()
-                                    .stroke(card.colour, lineWidth: 1)
-                            }
-                        }.aspectRatio(2, contentMode: .fit).padding(.horizontal, 10.0)
-                    }
-                }
-            }
-        }.padding(3)
-    }
-    
-    private struct DrawingConstants {
-        static let cornerRadius: CGFloat = 10
     }
 }
 

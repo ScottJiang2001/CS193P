@@ -134,7 +134,7 @@ struct SetGameModel<CardContent> {
             }
         }
         
-//        allCards.shuffle()
+        allCards.shuffle()
         
         for _ in 1...12 {
             let temp = allCards.removeFirst()
