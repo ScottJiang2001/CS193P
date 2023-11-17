@@ -13,15 +13,17 @@ struct CardView: View {
             Group {
                 if card.matched {
                     shape.stroke(lineWidth: 3).fill(Color.mint).opacity(1)
-
                 } else if card.notMatched {
                     shape.stroke(lineWidth: 3).fill(Color.orange)
                 } else if card.selected {
+                    shape.stroke(lineWidth: 5).opacity(1)
+                } else if card.hinted {
                     ZStack {
                         shape.fill(Color.yellow).opacity(0.4)
                         shape.stroke(lineWidth: 1)
                     }
-                } else {
+                }
+                else {
                     shape.stroke(lineWidth: 1).opacity(1)
                 }
             }

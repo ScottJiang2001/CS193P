@@ -28,6 +28,10 @@ class SetGameViewModel: ObservableObject {
         return model.discardedCards
     }
     
+    var matchedIndices: Array<Int> {
+        return model.matchedIndices
+    }
+    
     func choose(_ card: SetGameModel<String>.Card) {
         model.choose(card)
     }
@@ -38,5 +42,9 @@ class SetGameViewModel: ObservableObject {
     
     func startNewGame() {
         model = SetGameViewModel.createSetGame()
+    }
+    
+    func hint() {
+        model.hint()
     }
 }

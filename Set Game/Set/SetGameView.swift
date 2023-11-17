@@ -9,6 +9,7 @@ import SwiftUI
 
 struct SetGameView: View {
     @ObservedObject var setGame: SetGameViewModel
+    @State private var isShowingHintAlert = false
     
     var body: some View {
         VStack {
@@ -16,8 +17,13 @@ struct SetGameView: View {
             HStack {
                 discardedCards.padding(20)
                 Spacer()
-                Button("Start New Game") {
-                    setGame.startNewGame()
+                VStack {
+                    hintButton
+                    .buttonStyle(.bordered)
+                    .padding(15)
+                    Button("Start New Game") {
+                        setGame.startNewGame()
+                    }
                 }
                 Spacer()
                 undealtCards.padding(20)
@@ -88,6 +94,17 @@ struct SetGameView: View {
                 setGame.addCards()
             }
         }
+    }
+    
+    var hintButton: some View {
+        Button("Hint") {
+            if setGame.matchedIndices.count == 0 {
+                isShowingHintAlert.toggle()
+            } else {
+                setGame.hint()
+            }
+        }
+        .alert("No sets found: Add more cards", isPresented: $isShowingHintAlert, actions: {})
     }
     
     private struct CardConstants {

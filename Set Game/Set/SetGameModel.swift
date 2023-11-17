@@ -9,14 +9,16 @@ import Foundation
 import SwiftUI
 
 struct SetGameModel<CardContent> {
-    private(set) var allCards: Array<Card>
-    var playingCards: Array<Card>
-    var discardedCards: Array<Card>
+    private(set) var allCards: Array<Card> = []
+    var playingCards: Array<Card> = []
+    var discardedCards: Array<Card> = []
+    var matchedIndices: Array<Int> = []
+    private(set) var isHinted: Bool = false
     
     let shapes = ["rectangle", "diamond", "circle"]
     let opacities = [0, 0.4, 1]
     let colours = [Color.green, Color.blue, Color.red]
-
+    
     
     mutating func addCards() {
         var i = 0
@@ -40,6 +42,8 @@ struct SetGameModel<CardContent> {
                 i += 1
             }
         }
+        findMatchingIndices()
+        print(matchedCards.count)
     }
     
     /*
@@ -53,9 +57,11 @@ struct SetGameModel<CardContent> {
      */
     
     mutating func choose(_ card: Card) {
+        clearHints()
+        
         if let chosenIndex = playingCards.firstIndex(where: { $0.id == card.id} ),
-            !playingCards[chosenIndex].matched,
-            !playingCards[chosenIndex].notMatched
+           !playingCards[chosenIndex].matched,
+           !playingCards[chosenIndex].notMatched
         {
             playingCards[chosenIndex].selected.toggle()
             
@@ -66,6 +72,7 @@ struct SetGameModel<CardContent> {
                         if playingCards[cardIndex].matched {
                             let temp = playingCards.remove(at: cardIndex)
                             discardedCards.append(temp)
+                            findMatchingIndices()
                             
                         } else if playingCards[cardIndex].notMatched {
                             playingCards[cardIndex].selected.toggle()
@@ -76,7 +83,7 @@ struct SetGameModel<CardContent> {
                 }
             }
             
-        
+            
             if selectedCards.count == 3 {
                 if checkMatching(selectedCards) {
                     selectedCards.forEach { card in
@@ -93,10 +100,10 @@ struct SetGameModel<CardContent> {
                 }
             }
         }
-    
+        
     }
     
-   
+    
     private func checkMatching(_ selectedCards: Array<Card>) -> Bool {
         var attributes: [AnyHashable: Int] = [:]
         
@@ -115,12 +122,45 @@ struct SetGameModel<CardContent> {
         
         return true
     }
-
+    
+    mutating func hint() {
+        isHinted = true
+        matchedIndices.forEach {index in
+            playingCards[index].hinted = true
+        }
+    }
+    
+    mutating func clearHints() {
+        if isHinted {
+            isHinted = false
+            let hintedCards = playingCards.filter {$0.hinted}
+            
+            hintedCards.forEach {card in
+                if let hintedIndex = playingCards.firstIndex(where: {$0.id == card.id}) {
+                    playingCards[hintedIndex].hinted.toggle()
+                }
+            }
+        }
+    }
+    
+    mutating private func findMatchingIndices() {
+        matchedIndices.removeAll()
+        
+    outerloop: for i in 0..<(playingCards.count - 2) {
+        for j in i + 1..<(playingCards.count - 1) {
+            for k in j + 1..<(playingCards.count)   {
+                if checkMatching([playingCards[i], playingCards[j], playingCards[k]]) {
+                    matchedIndices = [i,j,k]
+                    break outerloop
+                }
+            }
+        }
+    }
+    }
+    
+    
     
     init() {
-        allCards = []
-        playingCards = []
-        discardedCards = []
         var idNum = 0
         
         for shape in shapes {
@@ -140,6 +180,8 @@ struct SetGameModel<CardContent> {
             let temp = allCards.removeFirst()
             playingCards.append(temp)
         }
+        
+        findMatchingIndices()
     }
     
     
@@ -153,6 +195,7 @@ struct SetGameModel<CardContent> {
         var selected: Bool = false
         var matched: Bool = false
         var notMatched: Bool = false
+        var hinted: Bool = false
     }
     
 }
